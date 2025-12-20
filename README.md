@@ -34,6 +34,12 @@ $ npm install
 ## Compile and run the project
 
 ```bash
+# run resource container
+$ docker-compose up -d
+
+# stop resource container
+$ docker-compose down
+
 # development
 $ npm run start
 
