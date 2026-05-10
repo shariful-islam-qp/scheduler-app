@@ -1,0 +1,30 @@
+name: scheduler-app-test
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: scheduler
+      POSTGRES_PASSWORD: Password123
+      POSTGRES_DB: schedulerDB
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U scheduler -d schedulerDB']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6380:6379
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 15
