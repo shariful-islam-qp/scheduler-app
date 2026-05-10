@@ -74,6 +74,19 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@src/(.*)$": [
+        "<rootDir>/src/$1"
+      ],
+      "^@modules/(.*)$": [
+        "<rootDir>/src/modules/$1"
+      ],
+      "^@lib/http-infra-lib(|/.*)$": "<rootDir>/libs/http-infra-lib/src/$1"
+    },
+    "roots": [
+      "<rootDir>/libs/",
+      "<rootDir>/apps/"
+    ]
   }
 }

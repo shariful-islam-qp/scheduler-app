@@ -19,7 +19,10 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await this.blockingClient.quit();
+    // Force-close the blocking socket: BRPOP 0 never completes, so quit() would hang
+    // forever waiting to flush it. disconnect() drops the socket immediately and the
+    // pending BRPOP rejects, letting WorkerService's loop exit on `running = false`.
+    this.blockingClient.disconnect();
     await this.client.quit();
   }
 
