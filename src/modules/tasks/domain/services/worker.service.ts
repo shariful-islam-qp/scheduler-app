@@ -5,6 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { RedisService } from 'src/modules/redis/domain/services/redis.service';
+import { REDIS_READY_QUEUE } from 'src/modules/redis/domain/redis-keys';
 import { TaskService } from './task.service';
 
 @Injectable()
@@ -17,25 +18,31 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
+    this.logger.log('Worker Service initialized **********');
     this.loop().catch((err) => this.logger.error(err));
   }
+
   onModuleDestroy() {
     this.running = false;
+    this.logger.log('Worker Service destroyed **********');
   }
 
   private async loop() {
-    const client = this.redisService.getClient();
+    const blocking = this.redisService.getBlockingClient();
     while (this.running) {
       try {
-        // BRPOP blocks until a task arrives
-        const res = await client.brpop('ready_queue', 0);
+        // Must use a dedicated connection; BRPOP on the same client as ZADD/ZRANGE deadlocks the app.
+        const res = await blocking.brpop(REDIS_READY_QUEUE, 0);
+        this.logger.log('res', res);
         if (!res) continue;
         const taskId = res[1];
-        this.logger.log(`Popped task ${taskId}`);
+        this.logger.log(`Popped task ${taskId} from ready_queue`);
 
         const task = await this.taskService.findOne(taskId);
         if (!task) {
-          this.logger.warn(`Task ${taskId} not found`);
+          this.logger.warn(
+            `No DB row for id=${taskId} (stale Redis member). Check zset scheduler:app:due_zset and list scheduler:app:ready_queue.`,
+          );
           continue;
         }
 
@@ -45,10 +52,11 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
         );
         // TODO: integrate email/push/sms service here
 
-        // mark done
         await this.taskService.markDone(taskId);
       } catch (err) {
-        this.logger.error(err);
+        const msg =
+          err instanceof Error ? (err.stack ?? err.message) : String(err);
+        this.logger.error(`Worker error: ${msg}`);
         // on error, continue; BRPOP will block again
       }
     }
