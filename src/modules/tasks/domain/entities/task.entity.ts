@@ -23,6 +23,10 @@ export class Task {
   @Column({ default: TaskStatus.PENDING })
   status: TaskStatus;
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    name: 'creation_date',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   createdAt: Date;
 }

@@ -1,9 +1,25 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "..",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "moduleNameMapper": {
+    "^src/(.*)$": ["<rootDir>/src/$1"],
+    "^@src/(.*)$": ["<rootDir>/src/$1"],
+    "^@modules/(.*)$": ["<rootDir>/src/modules/$1"],
+    "^@test/(.*)$": ["<rootDir>/test/$1"]
+  },
+  "verbose": true,
+  "testTimeout": 5000,
+  "collectCoverage": false,
+  "coverageReporters": ["json", "lcov", "text", "clover"],
+  "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "/coverage/",
+    "/test/",
+    "/src/modules/ai/"
+  ]
 }

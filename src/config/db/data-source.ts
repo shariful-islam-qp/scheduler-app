@@ -2,11 +2,11 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  host: 'localhost',
-  port: 5433,
-  username: 'scheduler',
-  password: 'Password123',
-  database: 'schedulerDB',
+  host: process.env.DB_HOST ?? 'localhost',
+  port: Number(process.env.DB_PORT ?? 5433),
+  username: process.env.DB_USER ?? 'scheduler',
+  password: process.env.DB_PASSWORD ?? 'Password123',
+  database: process.env.DB_NAME ?? 'schedulerDB',
   synchronize: true,
   logging: false,
   entities: ['dist/**/*.entity.js'],
